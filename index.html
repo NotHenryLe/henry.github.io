@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoang Le — Computer Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface-2: #1a2234;
+    --border: #1e293b;
+    --accent: #22d3ee;
+    --accent-dim: rgba(34,211,238,0.12);
+    --accent-glow: rgba(34,211,238,0.25);
+    --green: #34d399;
+    --green-dim: rgba(52,211,153,0.12);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251,191,36,0.12);
+    --rose: #fb7185;
+    --rose-dim: rgba(251,113,133,0.12);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-muted: #64748b;
+    --font-body: 'Outfit', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── Grain overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Background glow blobs ── */
+  .glow-wrap {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.15;
+  }
+  .glow-1 { width: 600px; height: 600px; background: var(--accent); top: -120px; left: -100px; }
+  .glow-2 { width: 500px; height: 500px; background: #8b5cf6; bottom: 10%; right: -80px; }
+  .glow-3 { width: 400px; height: 400px; background: var(--green); bottom: -80px; left: 30%; }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(10,14,23,0.75);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .nav-logo span { color: var(--text-muted); }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 64px;
+  }
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4rem;
+    align-items: center;
+    width: 100%;
+  }
+  .hero-tag {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(34,211,238,0.2);
+    margin-bottom: 1.2rem;
+    animation: fadeIn 0.6s ease-out 0.2s both;
+  }
+  .hero h1 {
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -2px;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.6s ease-out 0.35s both;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    max-width: 520px;
+    line-height: 1.8;
+    animation: fadeIn 0.6s ease-out 0.5s both;
+  }
+  .hero-contact {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    animation: fadeIn 0.6s ease-out 0.65s both;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s;
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-body);
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 30px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Hero right — terminal card */
+  .terminal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 340px;
+    overflow: hidden;
+    animation: fadeIn 0.6s ease-out 0.5s both;
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-dot.r { background: #ef4444; }
+  .terminal-dot.y { background: #eab308; }
+  .terminal-dot.g { background: #22c55e; }
+  .terminal-body {
+    padding: 1.2rem 1.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.9;
+    color: var(--text-dim);
+  }
+  .terminal-body .key { color: var(--accent); }
+  .terminal-body .val { color: var(--text); }
+  .terminal-body .str { color: var(--green); }
+  .terminal-body .comment { color: var(--text-muted); }
+
+  /* ── Sections ── */
+  section {
+    padding: 5rem 0;
+  }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── Experience Timeline ── */
+  .timeline { position: relative; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--green), transparent);
+    border-radius: 2px;
+  }
+  .tl-item {
+    position: relative;
+    padding-left: 52px;
+    padding-bottom: 3rem;
+  }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-dot {
+    position: absolute;
+    left: 9px;
+    top: 6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2.5px solid var(--accent);
+    z-index: 2;
+  }
+  .tl-item:nth-child(2) .tl-dot { border-color: var(--green); }
+  .tl-item:nth-child(3) .tl-dot { border-color: var(--amber); }
+  .tl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+  .tl-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+  .tl-date {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .tl-subtitle {
+    font-size: 0.88rem;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+  .tl-location {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+  }
+  .tl-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+  .tl-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(34,211,238,0.15);
+  }
+  .tl-tag.green { background: var(--green-dim); color: var(--green); border-color: rgba(52,211,153,0.15); }
+  .tl-tag.amber { background: var(--amber-dim); color: var(--amber); border-color: rgba(251,191,36,0.15); }
+  .tl-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .tl-bullets li {
+    position: relative;
+    padding-left: 1.2rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .tl-bullets li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ── Education ── */
+  .edu-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .edu-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--green), #8b5cf6);
+  }
+  .edu-degree {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .edu-school {
+    color: var(--accent);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+  }
+  .edu-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+  }
+  .edu-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .coursework-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .cw-tag {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Skills ── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.2rem;
+  }
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1.8rem;
+    transition: all 0.3s;
+  }
+  .skill-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .skill-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .skill-icon.cyan { background: var(--accent-dim); color: var(--accent); }
+  .skill-icon.green { background: var(--green-dim); color: var(--green); }
+  .skill-icon.amber { background: var(--amber-dim); color: var(--amber); }
+  .skill-icon.rose { background: var(--rose-dim); color: var(--rose); }
+  .skill-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+  .skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .skill-pill {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 5px;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .skill-card:hover .skill-pill {
+    border-color: rgba(34,211,238,0.2);
+    color: var(--text);
+  }
+
+  /* ── Activities & Interests ── */
+  .extras-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+  }
+  .extra-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1.8rem;
+  }
+  .extra-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .extra-card p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .interest-items {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.4rem;
+  }
+  .interest-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+  .interest-years {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    background: var(--surface-2);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    color: var(--text-muted);
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 0;
+    text-align: center;
+  }
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1.2rem;
+  }
+  .footer-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-copy {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .terminal-card { width: 100%; }
+    .extras-grid { grid-template-columns: 1fr; }
+    .nav-links { gap: 1rem; }
+    .nav-links a { font-size: 0.8rem; }
+    .hero-contact { flex-direction: column; }
+    .interest-items { flex-wrap: wrap; }
+    .edu-card { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-wrap">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+</div>
+
+<nav>
+  <div class="container">
+    <div class="nav-logo">hoang<span>.le</span></div>
+    <div class="nav-links">
+      <a href="#experience">Experience</a>
+      <a href="#education">Education</a>
+      <a href="#skills">Skills</a>
+      <a href="#more">More</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-tag">📍 Ho Chi Minh City, Vietnam</div>
+        <h1>Hoang <span class="accent">Le</span></h1>
+        <p class="hero-sub">Computer Engineering student at HCMUT building at the intersection of embedded systems, IoT, and edge AI. Passionate about hardware-software co-design and real-time systems.</p>
+        <div class="hero-contact">
+          <a href="mailto:hoangleq765@gmail.com" class="btn btn-primary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Get in Touch
+          </a>
+          <a href="tel:+84939961266" class="btn btn-ghost">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            (+84) 939 961 266
+          </a>
+        </div>
+      </div>
+      <div class="terminal-card">
+        <div class="terminal-bar">
+          <div class="terminal-dot r"></div>
+          <div class="terminal-dot y"></div>
+          <div class="terminal-dot g"></div>
+        </div>
+        <div class="terminal-body">
+          <span class="comment">// hoang.config.json</span><br>
+          {<br>
+          &nbsp;&nbsp;<span class="key">"name"</span>: <span class="str">"Hoang Le"</span>,<br>
+          &nbsp;&nbsp;<span class="key">"role"</span>: <span class="str">"CE Student"</span>,<br>
+          &nbsp;&nbsp;<span class="key">"school"</span>: <span class="str">"HCMUT"</span>,<br>
+          &nbsp;&nbsp;<span class="key">"langs"</span>: [<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"C/C++"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Python"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Verilog HDL"</span><br>
+          &nbsp;&nbsp;],<br>
+          &nbsp;&nbsp;<span class="key">"focus"</span>: [<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"IoT"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Embedded"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Edge AI"</span><br>
+          &nbsp;&nbsp;]<br>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ EXPERIENCE ═══════ -->
+<section id="experience">
+  <div class="container">
+    <div class="section-label">// experience</div>
+    <h2 class="section-title">Where I've Built Things</h2>
+
+    <div class="timeline">
+      <!-- 1 -->
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-header">
+          <span class="tl-title">Smart Home System (AIoT)</span>
+          <span class="tl-date">Feb 2026 – Present</span>
+        </div>
+        <div class="tl-subtitle">HCMUT — IoT Project</div>
+        <div class="tl-location">Ho Chi Minh City, Vietnam</div>
+        <div class="tl-tags">
+          <span class="tl-tag">Python</span>
+          <span class="tl-tag">MQTT</span>
+          <span class="tl-tag">JavaScript</span>
+          <span class="tl-tag">HTML/CSS</span>
+          <span class="tl-tag">Chart.js</span>
+        </div>
+        <ul class="tl-bullets">
+          <li>Engineered a full IoT Smart Home system with real-time environmental monitoring — temperature, humidity, and air quality</li>
+          <li>Built automated control algorithms for dynamic fan speed adjustment and lighting management</li>
+          <li>Designed a security module with motion detection, fire alarms, and PIN-based digital door lock</li>
+          <li>Created a responsive web dashboard with Chart.js for live power consumption visualization</li>
+          <li>Established device-to-cloud communication via MQTT over WebSockets on an Eclipse Mosquitto broker</li>
+        </ul>
+      </div>
+
+      <!-- 2 -->
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-header">
+          <span class="tl-title">ESP32 IoT & Edge AI Applications</span>
+          <span class="tl-date">Oct 2025 – Dec 2025</span>
+        </div>
+        <div class="tl-subtitle">Embedded Systems Project</div>
+        <div class="tl-location">Ho Chi Minh City, Vietnam</div>
+        <div class="tl-tags">
+          <span class="tl-tag green">C++</span>
+          <span class="tl-tag green">ESP32</span>
+          <span class="tl-tag green">TinyML</span>
+        </div>
+        <ul class="tl-bullets">
+          <li>Programmed ESP32 for multi-tasking — conditional LED blinking and NeoPixel control based on humidity</li>
+          <li>Interfaced temp/humidity sensors with LCD for real-time local data visualization</li>
+          <li>Configured ESP32 in AP mode hosting a web server for direct device control</li>
+          <li>Deployed a TinyML model on-device and benchmarked its performance for embedded ML</li>
+        </ul>
+      </div>
+
+      <!-- 3 -->
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-header">
+          <span class="tl-title">Teaching Assistant — British Council</span>
+          <span class="tl-date">Jan 2025 – May 2026</span>
+        </div>
+        <div class="tl-subtitle">British Council</div>
+        <div class="tl-location">Ho Chi Minh City, Vietnam</div>
+        <div class="tl-tags">
+          <span class="tl-tag amber">English (IELTS 7.0)</span>
+          <span class="tl-tag amber">MS Word</span>
+          <span class="tl-tag amber">MS Excel</span>
+        </div>
+        <ul class="tl-bullets">
+          <li>Collaborated with native-speaking educators in a 100% English-speaking environment for ESL instruction</li>
+          <li>Developed supplementary teaching materials and co-facilitated lessons</li>
+          <li>Completed compliance training in Information Security, Anti-Money Laundering, and Anti-Bribery</li>
+          <li>Authored daily student progress reports and tracked attendance/performance metrics</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ EDUCATION ═══════ -->
+<section id="education">
+  <div class="container">
+    <div class="section-label">// education</div>
+    <h2 class="section-title">Academic Foundation</h2>
+
+    <div class="edu-card">
+      <div class="edu-degree">B.Eng. in Computer Engineering</div>
+      <div class="edu-school">Ho Chi Minh City University of Technology (HCMUT)</div>
+      <div class="edu-meta">Expected Graduation: 2027 · Ho Chi Minh City, Vietnam</div>
+
+      <div class="edu-label">Relevant Coursework</div>
+      <div class="coursework-grid">
+        <span class="cw-tag">Digital Systems</span>
+        <span class="cw-tag">Logic Design with HDL</span>
+        <span class="cw-tag">LSI Logic Design</span>
+        <span class="cw-tag">Intro to SoC</span>
+        <span class="cw-tag">Microprocessors & MCUs</span>
+        <span class="cw-tag">Computer Architecture</span>
+        <span class="cw-tag">Electrical & Electronic Circuits</span>
+        <span class="cw-tag">Data Structures & Algorithms</span>
+        <span class="cw-tag">Mathematical Modeling</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ SKILLS ═══════ -->
+<section id="skills">
+  <div class="container">
+    <div class="section-label">// skills</div>
+    <h2 class="section-title">Technical Arsenal</h2>
+
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon cyan">&lt;/&gt;</div>
+        <h3>Programming Languages</h3>
+        <div class="skill-list">
+          <span class="skill-pill">C</span>
+          <span class="skill-pill">C++</span>
+          <span class="skill-pill">Python</span>
+          <span class="skill-pill">Verilog HDL</span>
+        </div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-icon green">⚙</div>
+        <h3>Software & Tools</h3>
+        <div class="skill-list">
+          <span class="skill-pill">STM32CubeIDE</span>
+          <span class="skill-pill">Xilinx Vivado</span>
+          <span class="skill-pill">Proteus</span>
+          <span class="skill-pill">MobaXterm</span>
+          <span class="skill-pill">VMware</span>
+        </div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-icon amber">🌐</div>
+        <h3>IoT & Web</h3>
+        <div class="skill-list">
+          <span class="skill-pill">MQTT</span>
+          <span class="skill-pill">WebSockets</span>
+          <span class="skill-pill">HTML/CSS/JS</span>
+          <span class="skill-pill">Chart.js</span>
+          <span class="skill-pill">ESP32</span>
+          <span class="skill-pill">AIoT Kits</span>
+        </div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-icon rose">🖥</div>
+        <h3>Operating Systems</h3>
+        <div class="skill-list">
+          <span class="skill-pill">Linux (Ubuntu)</span>
+          <span class="skill-pill">Windows</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ MORE ═══════ -->
+<section id="more">
+  <div class="container">
+    <div class="section-label">// beyond code</div>
+    <h2 class="section-title">Activities & Interests</h2>
+
+    <div class="extras-grid">
+      <div class="extra-card">
+        <h3>🏆 Award</h3>
+        <p>Runner-up at <strong>"Sinh Viên Thế Hệ Mới"</strong> competition with innovative Aloe vera food wrap research project.</p>
+      </div>
+
+      <div class="extra-card">
+        <h3>🌍 Languages</h3>
+        <p>Fluent in <strong>English</strong> (IELTS 7.0 — 2023) and <strong>Vietnamese</strong> (native).</p>
+      </div>
+
+      <div class="extra-card" style="grid-column: 1 / -1;">
+        <h3>🎯 Interests</h3>
+        <div class="interest-items">
+          <div class="interest-item">🏸 Badminton <span class="interest-years">12 yrs</span></div>
+          <div class="interest-item">⚽ Soccer <span class="interest-years">12 yrs</span></div>
+          <div class="interest-item">♟️ Chess <span class="interest-years">1 yr</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="container">
+    <div class="footer-links">
+      <a href="mailto:hoangleq765@gmail.com">Email</a>
+      <a href="https://github.com/YOUR_USERNAME" target="_blank">GitHub</a>
+    </div>
+    <div class="footer-copy">© 2026 Hoang Le · Built with ♥ in Ho Chi Minh City</div>
+  </div>
+</footer>
+
+</body>
+</html>
